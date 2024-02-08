@@ -1,0 +1,10 @@
+Configuration files for PiStorm running baremetal EMU68
+
+Please keep in mind that each configuration is specific
+for each Raspberry PI or Compute Module version, and
+might use parameters adjusted for that version
+(like ARMCLK for changing PI ARM cpu clock speed).
+
+So, if you test/use configuration files of another PI version,
+that does not match your hardware, please set ARMCLK parameters
+accordingly (or remove these parameters).

@@ -1,0 +1,59 @@
+HISTORY:
+ 2024-01-14 v1.0 - Nandgate/NMSA - "The Release Edition"
+  Changes:
+   Added Command Line Parameter: INFO
+   Added new config params (GENERIC, UAE, EMU68, MUSASHI): WHD
+   Added new config param (EMU68): NBW
+   Updated: WHDLoad-Startup
+   Updated Linux Parser Scripts (PiStormCompSheet, WHDLoadWrapper)
+   Updated Config Files: UAE, EMU68 (including WHDLoadWrapper005)
+ 
+ 2023-12-17 v0.5 - Nandgate/NMSA - "Xmas 2023 Edition"
+  Changes:
+    Bug fixing: WHDLoad-Startup, WHDLoad-Cleanup
+    Added EMU68 new config params: SCS, EMUCONTROL, EMU68INFO, EMUDOWNCLOCKER
+    Updated Parser Script: PiStorm Compat. Sheet XLS/TSV
+    Added new Parser Script for WHDLoadWrapper-Database by Tom-Cat
+    Updated Config Files:
+     EMU68: All (Games+Demos)
+     WHDLoad Slaves: slave keys updated (Games+Demos)
+
+ 2023-11-13 v0.4 - Nandgate/NMSA - "The Parsers Edition"
+  Changes:
+   Added EMU68 JIT=a-b-c format 
+   Added Command Line Parameters: NODEFAULT,FIRSTMATCH,QUIET
+   Linux Parser Scripts (XLS/TSV, GB64 Exported Access MDB, WinUAELoader XML)
+   Updated: Checksystem, WHDLoad-Startup, WHDLoad-Cleanup
+   Updated Config Files:
+     UAE:
+       Merged: WHDLoader + GameBase64 + Nandgate
+     EMU68:
+       A600rev1.3_Pi3A_by_Nandgate
+   Added New Config Files:
+     EMU68: (from PiStorm Compatibility Sheet 2023-11-13)
+       A500rev5_Pi3A_by_Tom-Cat
+       A1200rev1.D1_CM4_by_Tom-Cat
+       A1200rev1.D4_Pi3A_by_Nikosidis
+       A1200rev1.D4_Pi4B_by_Mr-Z
+       A1200rev1.D4_Pi4B_by_Shaytan
+
+ 2023-10-31 v0.3 - Nandgate/NMSA - "Spooky Halloween Edition"
+  Changes:
+   Script renamed from AccelBoardReconfig.rexx to ABR.rexx
+   Added Command Line Parameter LIST, to support several Config files
+   Added EMU68 params (SDDBF, ARMCLK)
+   Added Musashi param (PISIMPLE)
+   Added Board "GENERIC"
+   Changed Exit Codes to match AmigaOS standard
+    (0-Ok, 5-Warn, 10-Error, 20-Fail)
+   Code compact, bug fixing, optimizations
+   Updated: Checksystem, WHDLoad-Startup, WHDLoad-Cleanup
+
+ 2023-10-12 v0.2 - Nandgate/NMSA - Changes:
+   Added EMU68 Emu68Downclocker (DWNCLK param)
+   Added EMU68 SETCLOCKRATE (CLKRT param)
+   Added EMU68 JIT=a-b-c-r-d format 
+   EMU68 TURBO param fix, bug fixing, other changes
+
+ 2023-10-06 v0.1 - Nandgate/NMSA - Created
+ 

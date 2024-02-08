@@ -1,0 +1,353 @@
+Accelerator Board Reconfigurator - v1.0 by Nandgate/NMSA
+
+READ-ME file for AREXX script ABR.rexx
+=============================================================================
+FAQ:
+
+Q) So, what's this?
+
+  I made this AREXX script for configurating amiga accelerator/emulator cards
+  (like PiStorm, UAE...) before a game is launched via WHDLoad.
+
+Q) What cards are supported?
+
+  Currently, only WINUAE and PiStorm (EMU68 and Musashi).
+  A "GENERIC" board is also supported, just to provide SHELL parameter.
+  Another cards, config files and parameters can be added to script
+  using same principles.
+
+Q) How does it work?
+
+  For WHDLoad (use the latest version), simply put:
+
+    EXECUTEARGS=C <slavename>
+
+  on the ToolTypes of the game, for example:
+
+    EXECUTEARGS=C Lotus
+
+  NOTE:
+    Slavename must not have spaces.
+    You should use same "slavename" name of Tooltype "SLAVE=slavename.slave",
+    but without the ".slave" part. Then, just make sure the slavename exists
+    on the configuration file.
+
+  When the AREXX script is run via WHDLoad.prefs,
+  it gets the parameter "CONFIG Lotus",
+  and seaches for it in the configuration file
+  (corresponding to the accelerator you are using):
+
+   ABR.UAE.cfg     <-- config used if running in WINUAE
+   ABR.EMU68.cfg   <-- config used if running in Pistorm with EMU68 mode
+   ABR.MUSASHI.cfg <-- config used if running in Pistorm with Musashi mode
+   ABR.GENERIC.cfg <-- config used if no accelerator card or not supported
+
+  and it will match the Config line(s) starting with:
+
+   |Lotus|ParamName=ParamValue|...|...|
+
+  and configures accelerator parameters according to their pair name/value.
+
+  If LIST command line parameter is used, you can customize your config files.
+  For example, example command line parameter:
+
+   LIST Games CONFIG Lotus
+
+  will use configuration files:
+
+   ABR.Games.UAE.cfg
+   ABR.Games.EMU68.cfg
+   ABR.Games.MUSASHI.cfg
+   ABR.Games.GENERIC.cfg
+
+Q) What are the advantages?
+
+  - Automatic reconfiguration of accelerator cards accoding to a user
+    defined config id, which can also be a game/demo when using WHDLoad.
+  - To have configuration lists of settings according to the
+    accelerator/emulator you are running.
+  - Easy sharing and maintenance of configuration lists.
+  - To switch the SDCARD between accelerators without modifying ToolTypes.
+
+Q) What are the disadvantages?
+
+  - Well, you still have to edit the ToolTypes to put a line
+    "EXECUTEARGS=C <config>" there. Or use the WIB.rexx script.
+  - You still have to modify WHDLoad own parameters/tooltypes manually.
+
+Q) Can configuration file have duplicate configs?
+
+  Yes. In that case they are execute by it's order on configuration
+  file (same with the parameters).
+
+  So, for "CONFIG Lotus", if a config file has:
+
+   |Lotus|Param1=Value1|
+   |Lutus|Param2=Value2|
+
+  is the same as having:
+
+   |Lotus|Param1=Value1|Param2=Value2|
+
+  so, Param1 is executed first, then Param2 is executed next, and so on.
+  
+  NOTE: If command line "FIRSTMATCH" is used, only the first config line
+    will be processed. Use this if you have very large config files,
+    to avoid parsing the whole file.
+
+Q) Is the AREXX script bound to WHDLoad?
+
+  My goal is to try to keep the ABR.rexx script generic, so it can
+  be used by any other Amiga software (like WHDLoad), or script.
+  Also, i try to use only standard Amiga commands where possible,
+  and minimize the use of libs or 3rd party commands, in order
+  to reduce dependencies and install complexity.
+
+Q) Why AREXX and not Amiga Shell?
+
+  The first version was made in plain AmigaDOS shell script.
+  But soon it revealed to have many limitations.
+  Then, i thought what were the alternatives, and came up with AREXX,
+  since it seems to be present in all(?) AmigaOS versions,
+  and it's way more flexible.
+  I am learning AREXX, never coded on it.
+
+Q) What AmigaOS were used to test this?
+
+  AmigaOS 3.2.2.1
+  AmigaOS 3.9
+  AmigaOS 3.5
+  AmigaOS 3.1 with ClassicWorkbench v28
+
+  others may work.
+  They just need to have AREXX installed, and Assigns adjusted.
+
+Q) Will this work with CaffeineOS?
+
+  This was not tested, but there are issues that needs to be resolved first.
+  For CaffeineOS you have to merge script "Checksystem" with Caffeine's.
+  Both scripts also make use of variable ENV:BOARDNAME.
+
+Q) Will this work with OS X-Y-Z ?
+
+  Well, i don't know.
+
+Q) What Amiga was used to test this?
+
+  I used my only Amiga from my retro collection, a Pistormed Amiga600 rev 1.3
+  and also WINUAE 5.0 emulator on PC. The A600 was also all modified by me:
+  fully recapped, has a 8x KickStart switch, a 512KB-1MB Kick switch,
+  Reset switch, new keyboard PCB, CF adapter on top of PCMCIA, has 2MB Chip
+  RAM expansion with RTC, an internal Gotek with FlashFloppy with OLED and
+  Rotator switch, and an BluePill STM32 with FF-OSD daughterboard,
+  has an early PIStorm600 (without the fan connector) with a Raspberry PI3A+,
+  and the HDD LED connected to the PI with a BS170 mosfet.
+  The RF Modulator was removed, exposing both PI HDMI and USB connectors.
+  An SDCARD extension is connected to the PI and fitted on the internal floopy
+  slot. For software I use 2 SDCARDS, an 32GB for CaffeineOS, and another
+  64GB with EMU68, Linux/Musashi and with 6 Amiga partitions Multi-Booting
+  AmigaOS 3.1, 3.2.2.1, 3.5, 3.9. I have also built a new Amiga PSU,
+  based on a MeanWell RT-65B, with a fused USB +5V output.
+
+=============================================================================
+REQUIREMENTS:
+
+Things needed to run this script:
+
+1) Hardware:
+
+ - An Amiga with an supported accelerator card
+   (at this moment PISTORM/EMU68 and PISTORM/MUSASHI).
+   If you dont have an Amiga, you can still use WINUAE emulator.
+
+2) Software
+
+ - Amiga WINUAE emulator, is not required but good to have.
+
+ Configured on AmigaOS:
+ - AmigaOS with AREXX, like 3.1, 3.2.2, 3.5, 3.9. Others may work also.
+ - Required Environment Variables:
+    $BOARDNAME = board name running script (values: UAE, EMU68, MUSASHI)
+    See attached files "Checksystem" and "User-Startup" on how to do this.
+ - Required Environment Assigns:
+    REXX = path to AREXX scripts, and also
+           to this script and its config files ABR.*.cfg
+    REXXC = path to AREXX executables (like RX)
+    UAE = path to UAE commands (uae-configuration)
+    EMU68 = path to Emu68 commands (emu68info, emucontrol, emu68downclocker)
+    MUSASHI = path to Musashi commands (pi, pistorm, pisimple, piaudio)
+ - Configuration files:
+    ABR[.<LIST>].EMU68.cfg = config file for EMU68
+    ABR[.<LIST>].UAE.cfg = config file for UAE
+    ABR[.<LIST>].MUSASHI.cfg = config file for MUSASHI
+ - WHDLoad latest version (at date is 18.9),
+    which supporte "EXECUTEARGS", or will not work!
+    See attached files "WhdLoad.prefs", "WHDLoad-Startup" and
+    "WHDLoad-Cleanup" on how to do this.
+
+=============================================================================
+INSTALLATION:
+
+Q) How to install?
+
+1) If using UAE, create an UAE dir on amiga, and copy all files from
+   the PC emulator "WINUAE/Amiga Programs" to it.
+   This dir on amiga will be your "UAE:" assign.
+
+2) If using PISTORM/EMU68, create an PISTORM/EMU68 dir on amiga, and copy
+   all files from "Pistorm Tools" to it (with no sub-directories).
+   This dir on amiga will be your "EMU68:" assign.
+
+3) If using PISTORM/MUSASHI, create an PISTORM/MUSASHI dir on amiga, and copy
+   files "pi", "pistorm", "pisimple", "piaudio" from the emulated A314-shared
+   PiDisk: to it. This dir on amiga will be your "MUSASHI:" assign.
+
+4) The remaing Assigns are need, and used as:
+
+  REXX:  --> points to SYS:S directory, where .rexx scripts are
+             (including the "ABR.rexx" script).
+             Should already be assigned by default on AmigaOS.
+  REXXC: --> points to where RX executable is, usually SYS:REXXC
+
+5) copy script files to S: (same as Assign REXX:):
+
+    ABR.HISTORY.txt
+    ABR.README.txt
+    ABR.rexx
+    ABR.rexx.info
+
+6) copy given config files to S: (same as Assign REXX:):
+
+    ABR.EMU68.cfg
+    ABR.GENERIC.cfg
+    ABR.MUSASHI.cfg
+    ABR.UAE.cfg
+
+7) copy script to check your accelerator/emulator model to S:, like:
+
+  NOTE: note that CaffeineOS already has a script with this name,
+        so you might have to change it - you are on your own in this case!
+
+  copy Checksystem to S:
+
+8) Add contents of given "User-Startup" to your "User-Startup", and don't
+   forget to change the "Assigns" to match your installation
+   (see steps 1, 2, 3, 4).
+
+9) Add contents of given "WHDLoad-Startup" to your "WHDLoad-Startup",
+   and contents of given "WHDLoad-Cleanup" to your "WHDLoad-Cleanup".
+
+   NOTE: your scripts must start with lines:
+     .KEY L,C,I
+     .BRA <
+     .KET >
+
+10) The given "WHDLoad.prefs" file is just for reference.
+   Make sure following lines in "WHDLoad.prefs" call your "WHDLoad-Startup"
+   and "WHDLoad-Cleanup" scripts (paths may change).
+
+   ExecuteStartup=C:Execute S:WHDLoad-Startup  ; executed on WHDLoad startup
+   ExecuteCleanup=C:Execute S:WHDLoad-Cleanup  ; executed on WHDLoad exit
+
+11) Reboot amiga. Check if Assigns are OK and if AREXX script runs.
+
+  Open a shell and run (if using a List "Games", using ABR.Games.*.cfg files):
+
+    REXXC:RX REXX:ABR.rexx LIST Games CONFIG Check
+    
+  or simply (if not using a List, using ABR.*.cfg files):
+  
+    REXXC:RX REXX:ABR.rexx CONFIG Check
+
+  Check script output. Resolve any errors before proceeding.
+  If all ok, it will open an INFO dialog box with text "Seems to be working!".
+  Repeat the check for all configured accelerators that you will use
+  (UAE, Pistorm/emu68, Pistorm/musashi).
+
+12) Add "EXECUTEARGS" to game ToolType, for example the game "Lotus":
+
+  EXECUTEARGS=C Lotus
+
+  NOTE1: if given a CONFIG is not found on the cfg file,
+         then "CONFIG DEFAULT" is used from cfg file.
+         You can use command line parameter "NODEFAULT" to avoid this.
+  NOTE2: on launching game, if Tooltype "EXECUTEARGS" is not given,
+         then "CONFIG WHDLoadStartup" is used (see WHDLoad-Startup provided).
+         If "CONFIG WHDLoadStartup" is not found, then applies NOTE1.
+  NOTE3: on exiting game, the "CONFIG WHDLoadCleanup" is used
+         (see WHDLoad-Cleanup provided).
+         If "CONFIG WHDLoadCleanup" is not found, then applies NOTE1.
+  NOTE4: you have to use WHDLoad latest version (at date is 18.9),
+         which supporte "EXECUTEARGS", or will not work!
+
+13) Start the game and check if it works!
+
+==============================================================================
+COMMAND LINE PARAMETERS AND WHAT THEY DO:
+
+- <CONFIG name>
+
+  Specify config key name to search on config file.
+  If key name not found on the config file, "DEFAULT" key name will
+  be used on the same config file, unless param NODEFAULT is used.
+
+- [LIST name]
+
+  Specify name of list to use for config files.
+  Config filenames format are:
+  
+    ABR[.<LIST>].<BOARDNAME>.cfg 
+  
+  If LIST name not specified, config filename format is simply:
+  
+    ABR.<BOARDNAME>.cfg 
+
+  Where BOARDNAME is one of: GENERIC, UAE, EMU68, MUSASHI.
+  The BOARDNAME value will depend on board detected by script "Checksystem".
+ 
+- [INFO file]
+
+  Specify INFO file for updating ToolTypes with WHD param on config file.
+  After updating the INFO file, it is required to re-launch the game/demo
+  again, with the new WHDLoad settings. A popup informative window will
+  ask for this, unless the INFO file required no update.
+  
+  If INFO param not specified and WHD param on config file is used,
+  a popup informative window will always appear and display which
+  WHDLoad settings to (un)set manually.
+  
+- [NODEFAULT]
+
+  Do not call the same config file with key "DEFAULT",
+  if the original config key was not found.
+  
+- [FIRSTMATCH]
+
+  Exit script on the first config key name matched line on config file.
+  Use this if your config file is large.
+  However, using this parameter will not process subsequent lines
+  on config file, with the same config key name.
+  
+- [QUIET]
+
+  Suppress output to console (except errors).
+
+==============================================================================
+EXAMPLES AND USAGE:
+
+1) RX ABR.REXX LIST Games CONFIG Lotus INFO A-Games:L/Lotus/Lotus.info
+
+  this will read config file:
+  
+    ABR.Games.<BOARDNAME>.cfg
+  
+  searching for a config key name named "Lotus":
+  
+    |Lotus|WHD=NOCACHE|board specific settings...|
+ 
+  if config key name not found,
+  it will search the config file again for key named "DEFAULT":
+
+    |DEFAULT|board specific settings...|
+
+  The BOARDNAME value will depend on board detected by script "Checksystem".

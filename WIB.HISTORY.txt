@@ -1,0 +1,55 @@
+HISTORY:
+ 2024-01-14 v1.0 - Nandgate/NMSA - "The Release Edition"
+  Changes: Optimizations
+
+ 2023-12-17 v0.4 - Nandgate/NMSA
+   Changes:
+   Bug fixing: UNCMTTT, SETSLAVE method 2
+   Script now keeps track if a INFO file is changed, for ReturnCode:
+    Using Parameter "FILE <file.info>", after processing, script exits with:
+     RC=0 : info file processed and updated
+     RC=1 : info file processed, but not updated
+    Using Parameter "DIR <file.info>", after processing, script exits with:
+     RC=0 : all info files processed, and some/all updated
+     RC=1 : all info files processed, no file was updated
+   However, with these changes, processing now is a bit slower
+
+ 2023-11-13 v0.3 - Nandgate/NMSA - "The Parsers Edition"
+  Changes:
+  Added Parameters:
+   FILE, SETEAINFO, QUIET
+  Tooltype EXECUTEARGS has new specification. The "LIST" and
+  "CONFIG" parameter names shrunk to a single char, from:
+    EXECUTEARGS=LIST <list> CONFIG <config>
+  to:
+    EXECUTEARGS=L <list> C <config> I <fullpath-to-file.info>
+  which requires reprocessing of all INFO files set with previous
+  versions. Also, added new param I, for the INFO file fullpath,
+  which is added using new script parameter SETEAINFO.
+  Updated WIB.README.txt, WHDLoad-Startup, WHDLoad-Cleanup
+
+ 2023-10-31 v0.2 - Nandgate/NMSA - "Spooky Halloween Edition"
+  Changes:
+  Script renamed from WHDLoadInfoBatch.rexx to WIB.rexx
+  New Required Lib: LIBS:rexxsupport.library
+  Added Parameters:
+   LOG,DEBUG,ALTSCAN,NOASK,DELTT,CMTTT,UNCMTTT,SETTT,SETSLAVE,SETEALIST
+  Improved/Changed Parameters:
+   SETEASLAVE (renamed to SETEACFG),CREATECFG
+  Changed Exit Codes to match AmigaOS standard
+    (0-Ok, 5-Warn, 10-Error, 20-Fail)
+  Bug fixing, optimizations
+  Updated WIB.README.txt
+
+ 2023-10-16 v0.1 - Nandgate/NMSA - Created
+
+==============================================================================
+KNOWN ISSUES:
+
+- For some unknown reason, script WIB.REXX can't update this INFO:
+
+    D/DragonTiles/DragonTiles.info
+
+  I traced the problem back to the "FileToTT" utility that the script uses.
+  Being an external program, there is nothing I can do.
+  In the end, you have to update the above INFO file manually.

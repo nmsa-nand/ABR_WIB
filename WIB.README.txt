@@ -1,0 +1,320 @@
+WHDLoad Info Batch - v1.0 Nandgate/NMSA
+
+READ-ME file for AREXX script WIB.rexx
+==============================================================================
+*** WARNING *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***
+*
+*  Make a BACKUP of your WHDLoad collection (or at least all #?.info files),
+*  before trying out this script! Use it at your own risk!
+*
+*** WARNING *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***
+
+To make a backup of all .info files to "backupinfos.lha":
+
+  cd <root_dir_of_whdload_collection_files>
+  lha -r a backupinfos.lha #?.info
+
+To restore backup if needed:
+
+  cd <root_dir_of_whdload_collection_files>
+  lha x backupinfos.lha
+
+==============================================================================
+FAQ:
+
+Q) So, what's this?
+
+ I made this AREXX script for Batch setting ToolType
+ "EXECUTEARGS=C <slave_name>" on the .info files used by
+ WHDLoad. The ToolType is meant to be used with the "ABR.rexx" script.
+
+Q) What can "WIB.rexx" do?
+
+ Currently, it traverses a directory and it's subdirectories looking for
+ .info files, and then it can do some operations with those files:
+
+  1) Add/set "EXECUTEARGS=C <slave_name>" to ALL .info files which have
+     a ToolType "SLAVE=slave_name".
+
+  2) Add/Set ToolTypes.
+
+  3) Delete ToolTypes, which are not commented.
+
+  4) Comment and uncomment ToolTypes.
+
+  5) Create a CFG file from all .info files with ToolType SLAVE.
+     The CFG file is to be used with the "ABR.rexx" script.
+
+Q) What is the script performance?
+
+  For the "SETEACFG CREATECFG" options running on a ~4000 .info/slave
+  files collection, should take < 30 min running in WINUAE on a moddern PC.
+  On a real Amiga will take way longer, depending on the hardware used.
+  Using more command line parameters will of course take more time.
+
+Q) What AmigaOS were used to test this?
+
+  AmigaOS 3.2.2.1
+  AmigaOS 3.9
+  AmigaOS 3.5
+  AmigaOS 3.1 with ClassicWorkbench v28
+
+  others may work.
+  They just need to have AREXX installed, and Assigns adjusted.
+
+Q) So, this is a small FAQ?
+
+  For more info, consult the README of the "ABR.rexx" script.
+
+==============================================================================
+INSTALLATION:
+
+How to install?
+
+1) Copy "WIB.rexx" to your REXX: directory:
+
+  copy WIB#? REXX:
+
+2) Go to Aminet and grab "IconPrgs" (or "IconHelper"):
+
+  http://aminet.net/package/util/cli/IconPrgs
+  http://aminet.net/package/util/misc/iconhelper
+
+3) Decompress "IconPrgs.lha":
+
+  lha x IconPrgs.lha ram:
+
+  NOTE: if you need "lha" executable, you can grab it here:
+        http://aminet.net/package/util/arc/lha
+
+4) Copy required "IconPrgs" executables to SYS:C
+
+  copy FileToTT C:
+  copy TTToFile C:
+
+5) For this to work, you will need at least WHDLoad version 18.9,
+   which supports "EXECUTEARGS".
+
+6) Done!
+
+==============================================================================
+PARAMETERS AND WHAT THEY DO:
+
+- LOG
+  Log all script output to a specified file.
+  Note that this will slow down processing time.
+
+- ALTSCAN
+  Use alternate method to scan INFO files.
+  By default, scan method is based on buggy AmigaDOS shell LIST command,
+  which may fail traversal for some reason - it happens.
+  The LIST command also gets all INFO files.
+  Using ALTSCAN will use AREXX to list INFO files, and also
+  discards some un-eligible INFO files, for example, like "README.info".
+
+- DIR <name>
+  Specify root directory to traverse and process.
+  If this parameter is not given, use the current directory as root.
+  Cannot be used together with FILE parameter.
+
+  NOTE:
+   Using this parameter, after processing, script exits with:
+     RC=0 : all info file processed and some/all updated
+     RC=1 : all info files processed, no file was updated
+
+- FILE <file.info>
+  Specify a single INFO file to process.
+  Cannot be used together with DIR parameter.
+
+  NOTE:
+   Using this parameter, after processing, script exits with:
+     RC=0 : info file processed and updated
+     RC=1 : info file processed, but not updated
+  
+- DELTT <tooltype>
+  Delete ToolType (if it is not commented).
+
+- DELEA
+  Delete ToolType EXECUTEARGS (if it is not commented).
+  Equivalent to DELTT EXECUTEARGS.
+
+- CMTTT <tooltype>
+  Comment ToolType (if it is not commented).
+
+- UNCMTTT <tooltype>
+  UnComment ToolType, commented with ";" "*" or "( )".
+
+  NOTE:
+  Using parameter UNCMTTT when both uncommented and commented lines of a
+  tooltype exist, this option will do nothing.
+  
+  For example, "UNCMTTT ATT" with existing:
+  
+   ATT=value1
+   ;ATT=value2
+   
+  will result in
+   
+   ATT=value1
+   ;ATT=value2
+
+  Using parameter UNCMTTT when various commented lines of a tooltype exist,
+  will remove all lines, except the last one (which is uncommented).
+  
+  For example, "UNCMTTT ATT" with existing:
+
+   ;ATT=value1
+   ;ATT=value2
+   ;ATT=value3
+   
+  will result in
+   
+   ATT=value3
+
+- SETTT <tooltype[=value]>
+  Set/Update ToolType (with a value, if given).
+  Commented ToolTypes are ignored.
+
+  NOTE:
+  If there are duplicate ToolTypes, they are removed,
+  keeping only the command line one, passed to the script.
+
+- SETSLAVE <method>
+  Set/Update SLAVE ToolType, using method:
+   method=1 : SLAVE=<the INFO filename, but with .slave extension>"
+   method=2 : SLAVE=<First file .slave found in same dir of INFO file>
+  This will process ALL INFO files found in dir traversal, because
+  it assumes none of them as the SLAVE tooltype. Because,
+  by default, only INFO files with tooltype SLAVE are processed.
+  You may want to use ALTSCAN to discard some unwanted INFO files.
+  This parameter SETSLAVE must be used separately, and not in
+  conjunction with the other tooltype manipulating parameters:
+  DELEA, DELTT, CMTTT, UNCMTTT, SETTT or SETEACFG.
+
+  NOTE:
+  If there are duplicate ToolTypes, they are removed,
+  keeping only the command line one, passed to the script.
+
+- CREATECFG
+  Create a cfg file with the SLAVEs found on processed INFO files.
+  The CFG file is to be used with the "ABR.rexx" script, and contains all
+  Slave names found on ToolType SLAVE, sorted and with duplicates removed.
+  A file "ABR.Created_by_WIB.cfg" will be created on current directory.
+  Consult "ABR.rexx" documentation for further info on using the CFG file.
+
+  TIP:
+   dont use the CFG file with all entries listed, because is slower to parse.
+   Remove the empty entries, and use only the entries you need.
+
+- SETEACFG
+  Create Tooltype "EXECUTEARGS=C <value of SLAVE>" for use with
+  ABR.rexx script.
+  The CONFIG value will be used as ID key for config files lookup:
+
+    ABR.UAE.cfg
+    ABR.EMU69.cfg
+    ABR.MUSASHI.cfg
+    ...
+
+  NOTE:
+  If there are duplicate ToolTypes, they are removed,
+  keeping only the command line one, passed to the script.
+
+- SETEALIST <listname>
+  Specify LIST value for use with SETEACFG, this will create Tooltype:
+    
+    EXECUTEARGS=L <listname> C <value_of_SLAVE>
+    
+  for use with ABR.rexx script.
+  The LIST will be used for the name of config files lookup:
+
+    ABR.<listname>.UAE.cfg
+    ABR.<listname>.EMU69.cfg
+    ABR.<listname>.MUSASHI.cfg
+    ...
+
+  For example "SETEALIST Games" will create tooltype:
+  
+    EXECUTEARGS=L Games C Lotus
+
+  and then it uses files:
+
+    ABR.Games.UAE.cfg
+    ABR.Games.EMU69.cfg
+    ABR.Games.MUSASHI.cfg
+    ...
+
+- SETEAINFO
+  This param adds the name of the processed INFO file to EXECUTARGS tooltype:
+  
+    EXECUTEARGS=C Lotus I A-Games:L/Lotus/Lotus.info
+
+  NOTE: The fullpath to INFO file cannot have spaces. If this happens, the
+    script issues a warning and the I parameter is not added to EXECUTEARGS.
+    To solve this, use paths (and info filename) with no spaces.
+  NOTE2: The total length of the EXECUTEARGS tooltype line cannot exceed
+    127 chars on the info file. If this happens, the script aborts processing.
+    To solve this, reduce your fullpath length, for example, using ASSIGNs like
+    "A-Games:" or "A-Demos:" to point to the root of your WHDLoad files.
+
+- NOASK
+  Assume YES to all questions.
+
+- DEBUG
+  Don't delete temporary files. Also provides some debug info.
+
+- QUIET
+  Suppress all console output, but still outputs to LOG (if used).
+  Error messages and user interactove questions are always displayed on console.
+
+FINAL NOTES:
+  - Operation FILE and DIR cannot be used together.
+  - Operstions SETEALIST and SETEAINFO require use of SETEACFG.
+  - Only one operation (SET, DEL, CMT, UNCMT) is permitted per tooltype,
+    but several operations can be used on different tooltypes, with
+    the exception of the operation SETSLAVE, which must be used alone.
+  - Tooltypes named "IM1" and "IM2" are not permitted (Amiga Newicons).
+
+==============================================================================
+EXAMPLES AND USAGE:
+
+1) To add "EXECUTEARGS=C <slave_name>" to ALL .info files which have a
+   ToolType "SLAVE=slave_name".
+
+  Open Amiga shell and type:
+
+    SYS:REXXC/RX WIB.rexx DIR <root> SETEACFG
+
+  This will SET ToolType "EXECUTEARGS=C <slave_name>"
+  to ALL info files which have a ToolType "SLAVE=slave_name".
+  or, if you want to use a config file for a particular list (for Games):
+
+    SYS:REXXC/RX WIB.rexx DIR <root> SETEACFG SETEALIST Games
+
+  This will SET ToolType "EXECUTEARGS=L Games C <slave_name>"
+
+  NOTE:
+    you can use RX directly instead of SYS:REXXC/RX, if command RX is in PATH.
+    The SYS:REXXC/RX is the AmigaOS general default location for RX.
+    The RX executable looks for AREXX scripts in REXX: (this assign should be
+    assigned by default on AmigaOS, and should point to SYS:S)
+
+2) To delete ToolType "EXECUTEARGS" from .info files:
+
+  Open Amiga shell and type:
+
+    SYS:REXXC/RX WIB.rexx DIR <root> DELEA
+
+  NOTE: delete will not work on commented Tooltypes.
+
+3) To create a CFG file from processed .info files:
+
+  Open Amiga shell and type:
+
+    SYS:REXXC/RX WIB.rexx DIR <root> CREATECFG
+
+  This will create a file "ABR.Created_by_WIB.cfg" on the
+  current directory, and doesn't change any .info files by itself.
+  The CFG file is to be used with the "ABR.rexx" script, and contains all
+  Slave names found on ToolType SLAVE, sorted and with duplicates removed.
+  Consult "ABR.rexx" documentation for further info on using the CFG file.

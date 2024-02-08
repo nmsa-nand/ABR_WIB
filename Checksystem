@@ -1,0 +1,33 @@
+; $VER: Checksystem 1.0 2024-01-11
+; Check which Environment/Emulator is running,
+; and sets environment accordingly
+
+echo ** AmigaOS ${Versions/Release} **
+echo ** Kickstart: $Kickstart Workbench: $Workbench **
+
+failat 200
+
+; Generic Board
+C:SETENV BOARDNAME GENERIC
+
+; Check UAE
+version >nil: uaehf.device 1
+if not warn
+  C:SETENV BOARDNAME UAE
+endif
+
+; Check PISTORM/EMU68
+version >nil: brcm-sdhc.device
+if not warn
+  C:SETENV BOARDNAME EMU68
+endif
+
+; Check PISTORM/MUSASHI
+version >nil: pi-scsi.device
+if not warn
+  C:SETENV BOARDNAME MUSASHI
+endif
+
+echo ** Running in $BOARDNAME **
+
+wait 2

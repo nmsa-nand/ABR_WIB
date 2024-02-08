@@ -1,0 +1,83 @@
+-- MS ACCESS MODULES:
+    
+-- Go TOOLS -> REFERENCES
+-- Add "Microsoft VBscript Regular Expressions 5.5" to modules
+
+-- module1:
+
+Function my_regexp(ByRef sIn As String, ByVal mypattern As String) As String
+   Dim r As New RegExp
+    Dim colMatches As MatchCollection
+    With r
+        .Pattern = mypattern
+        .IgnoreCase = True
+        .Global = False
+        .MultiLine = False
+        Set colMatches = .Execute(sIn)
+    End With
+    If colMatches.Count > 0 Then
+        my_regexp = colMatches(0).Value
+    Else
+        my_regexp = ""
+    End If
+End Function
+
+-- module2:
+
+Public Function MultiReplace(varInput, ParamArray varReplacements())
+
+    ' call like this:
+    ' MultiReplace("abcdefghijk","c","V","e","X","j","Y","m","Z")
+    ' to return this:
+    ' abVdXfghiYk
+
+    Const MESSAGETEXT = "Uneven number of replacements parameters."
+    Dim n As Integer
+    Dim varOutput As Variant
+    Dim intParamsCount As Integer
+    
+    If Not IsNull(varInput) Then
+        intParamsCount = UBound(varReplacements) + 1
+        If intParamsCount Mod 2 = 0 Then
+            varOutput = varInput
+            For n = 0 To UBound(varReplacements) Step 2
+                varOutput = Replace(varOutput, varReplacements(n), varReplacements(n + 1))
+            Next n
+        Else
+            MsgBox MESSAGETEXT, vbExclamation, "Invalid Operation"
+        End If
+    End If
+            
+    MultiReplace = varOutput
+    
+End Function
+
+======================================================================================================================================================
+-- MS ACCESS QUERIES:
+
+-- GAMES/DEMOS
+
+SELECT "|" + x.Config+"|"+Params
+FROM (
+SELECT DISTINCT
+  Name,
+  MultiReplace(Name,"(","",")",""," ","","-","","+","","/","","_","","'","",",","","#","",".","") as Config,
+  Replace(
+       my_regexp(Gemus,"cache_size=.*")+
+       my_regexp(Gemus,"immediate_blits=.*")+
+       my_regexp(Gemus,"waiting_blits=.*")+
+       my_regexp(Gemus,"collision_level=.*")+
+       my_regexp(Gemus,"cpu_speed=.*")+
+       my_regexp(Gemus,"cpu_throttle=.*")+
+       my_regexp(Gemus,"cpu_compatible=.*")+
+       my_regexp(Gemus,"cpu_data_cache=.*")+
+       my_regexp(Gemus,"cpu_multiplier=.*")+
+       my_regexp(Gemus,"cpu_cycle_exact=.*")+
+       my_regexp(Gemus,"cpu_memory_cycle_exact=.*")+
+       my_regexp(Gemus,"blitter_cycle_exact=.*")+
+       my_regexp(Gemus,"cycle_exact=.*")
+      ,CHR(13),'|') as Params
+FROM Games
+) as x
+WHERE x.Params <> "|" AND x.Params <> ""
+ORDER BY x.Name

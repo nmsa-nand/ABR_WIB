@@ -1,0 +1,15 @@
+; $VER: User-Startup 1.0 2024-01-11
+
+IF EXISTS S:Checksystem
+  Execute S:Checksystem
+EndIf
+
+Assign >NIL: REXXC: SYS:REXXC
+Assign >NIL: UAE: SDH4:Programs/UAE
+PATH UAE: ADD
+Assign >NIL: Emu68: SDH4:Programs/PiStorm/Emu68/Tools-20231104
+PATH Emu68: ADD
+Assign >NIL: Musashi: SDH4:Programs/PiStorm/Musashi
+PATH Musashi: ADD
+Assign >NIL: WHDLoad: SDH4:WHDLoad
+PATH WHDLoad: ADD

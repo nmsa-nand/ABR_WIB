@@ -1,0 +1,19 @@
+; $VER: WHDLoad-Cleanup 1.0 2024-01-11
+  
+.KEY L/K,C/K,I/K
+.BRA <
+.KET >
+
+SET PLIST ""
+IF NOT "<L>" EQ ""
+  SET PLIST "LIST <L>"
+ENDIF
+IF NOT "<I>" EQ ""
+  ECHO "WHDLoad-Startup Called by file: <I>"
+ENDIF
+
+REXXC:RX REXX:ABR.rexx FIRSTMATCH $PLIST CONFIG WHDLoadCleanup
+
+IF NOT VAL $RC EQ 0
+  EXIT $RC
+ENDIF
